@@ -19,7 +19,7 @@ module TeneyPlugins
     banner 'knife dig ROLE'
 
     def initialize(*args)
-      @level = 0
+      level = 0
       super
     end
 
@@ -29,6 +29,7 @@ module TeneyPlugins
     end
 
     def run
+      level = 0
       unless name_args.size == 1
         puts 'Please provide a role to dig'
         show_usage
@@ -37,21 +38,21 @@ module TeneyPlugins
 
       role_name = name_args.first
 
-      output "\n#{role_name} digging..."
-      output 'role: ' + role_name
-      dig_role(role_name)
+      output("\nDigging around #{role_name} ...",level)
+      output('role: ' + role_name,level)
+      dig_role(role_name,level)
     end # run
 
-    def dig_role(role_name)
-      @level += 1
+    def dig_role(role_name, level)
+      level +=  1
 
       role = Chef::Role.load(role_name)
        role.run_list.each do |item|
         if item.role?
-          output 'role: ' + item.name
-          dig_role(item.name)
+          output('role: ' + item.name,level)
+          dig_role(item.name,level)
         elsif item.recipe?
-          output 'recipe: ' + item.name
+          output('recipe: ' + item.name,level)
         end
       end
     end
@@ -64,13 +65,13 @@ module TeneyPlugins
       end
     end
 
-    def output(msg)
-      ui.msg(indent_str + msg)
+    def output(msg,level)
+      ui.msg(indent_str(level) + msg)
     end
 
-    def indent_str
+    def indent_str(level)
       str = ''
-      @level.times { str <<  ' ' }
+      level.times { str <<  ' ' }
       return str
     end
   end
